@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { notifySuccess, notifyError } from '../components/Notifications';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -10,9 +11,9 @@ export default function Login() {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
-      alert('Logged in successfully');
+      notifySuccess('Logged in successfully');
     } catch (error) {
-      alert(error.response.data.error);
+      notifyError(error.response.data.error);
     }
   };
 
