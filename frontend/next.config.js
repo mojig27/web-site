@@ -1,5 +1,5 @@
 module.exports = {
-    reactStrictMode: true,
+  reactStrictMode: true,
     images: {
       domains: ['your-image-domain.com'], // دامنه‌هایی که تصاویر از آن‌ها بارگذاری می‌شوند
     },

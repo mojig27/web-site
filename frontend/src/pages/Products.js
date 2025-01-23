@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import SearchBar from '../components/SearchBar';
 
 export default function Products() {
@@ -9,11 +9,11 @@ export default function Products() {
   };
 
   return (
-    <div>
+    <div className="container mx-auto p-4">
       <SearchBar onSearch={handleSearch} />
-      <ul>
+      <ul className="mt-4">
         {products.map((product) => (
-          <li key={product._id}>{product.name}</li>
+          <li key={product._id} className="border-b p-2">{product.name}</li>
         ))}
       </ul>
     </div>

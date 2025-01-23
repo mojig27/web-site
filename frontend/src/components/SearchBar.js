@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 
 export default function SearchBar({ onSearch }) {
@@ -15,14 +16,20 @@ export default function SearchBar({ onSearch }) {
   };
 
   return (
-    <form onSubmit={handleSearch}>
+    <form onSubmit={handleSearch} className="flex items-center p-4">
       <input
         type="text"
         placeholder="Search for products"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        className="border rounded p-2 mr-2"
       />
-      <button type="submit">Search</button>
+      <button type="submit" className="bg-blue-500 text-white rounded p-2">Search</button>
     </form>
   );
 }
+
+// تعریف prop types برای اطمینان از ارسال صحیح props
+SearchBar.propTypes = {
+  onSearch: PropTypes.func.isRequired,
+};

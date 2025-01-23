@@ -1,14 +1,19 @@
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// src/components/Notifications.js
+import styled from 'styled-components';
 
-export const notifySuccess = (message) => {
-  toast.success(message);
-};
-
-export const notifyError = (message) => {
-  toast.error(message);
-};
+const Notification = styled.div`
+  padding: 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  margin: 10px 0;
+`;
 
 export default function Notifications() {
-  return <ToastContainer />;
+  return (
+    <div>
+      <Notification>
+        This is a notification message.
+      </Notification>
+    </div>
+  );
 }
