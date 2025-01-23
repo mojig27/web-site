@@ -29,7 +29,6 @@ export default function SearchBar({ onSearch }) {
   );
 }
 
-// تعریف prop types برای اطمینان از ارسال صحیح props
 SearchBar.propTypes = {
   onSearch: PropTypes.func.isRequired,
 };
