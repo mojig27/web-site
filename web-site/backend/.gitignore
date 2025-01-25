@@ -1,0 +1,10 @@
+# Ignore system files and folders
+/AppData/
+/Cookies/
+/Desktop/
+/Documents/
+/Downloads/
+/Music/
+/Pictures/
+/Videos/
+/node_modules/
