@@ -1,28 +1,51 @@
 import js from '@eslint/js'
+import { FlatCompat } from '@eslint/eslintrc'
 import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import reactHooks from 'eslint-plugin-react-hooks'
 
-export default tseslint.config(
-  { ignores: ['dist'] },
+const compat = new FlatCompat()
+
+export default [
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    ignores: ['dist/*']
+  },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...compat.config({
+    extends: [
+      'plugin:react-hooks/recommended'
+    ]
+  }),
+  {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.es2021
+      },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true
+        }
+      }
     },
     plugins: {
-      'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      'react-hooks': reactHooks
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true },
+        { allowConstantExport: true }
       ],
-    },
-  },
-)
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }]
+    }
+  }
+]
