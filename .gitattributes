@@ -1,0 +1,6 @@
+"*.js text eol=lf" 
+"*.json text eol=lf" 
+"*.css text eol=lf" 
+"postcss.config.js text eol=lf" 
+
+"tailwind.config.js text eol=lf" 
