@@ -5,12 +5,17 @@ import 'dotenv/config';
 import { connectDB } from './config/database';
 import { errorHandler } from './middleware/error';
 import authRoutes from './routes/auth.routes';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './config/swagger';
 import productRoutes from './routes/product.routes';
 
 // Connect to MongoDB
 connectDB();
 
 const app = express();
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Middleware
 app.use(cors({

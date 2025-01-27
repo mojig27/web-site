@@ -24,6 +24,12 @@ export const createProductSchema = z.object({
       .number()
       .int('موجودی باید عدد صحیح باشد')
       .min(0, 'موجودی نمی‌تواند منفی باشد')
+      title: z.string().min(3, 'Title must be at least 3 characters'),
+      description: z.string().min(10, 'توضیحات باید حداقل 10 کاراکتر باشد'),
+      price: z.number().min(0, 'قیمت نمی‌تواند منفی باشد'),
+      image: z.string().url('آدرس تصویر معتبر نیست'),
+      category: z.string(),
+      stock: z.number().min(0, 'موجودی نمی‌تواند منفی باشد')
   })
 });
 

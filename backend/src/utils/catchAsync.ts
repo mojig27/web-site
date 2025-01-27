@@ -1,4 +1,4 @@
-// backend/src/utils/catchAsync.ts
+// src/utils/catchAsync.ts
 import { Request, Response, NextFunction } from 'express';
 
 export const catchAsync = (fn: Function) => {

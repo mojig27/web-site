@@ -1,6 +1,6 @@
-// backend/src/middleware/validate.ts
+// src/middleware/validate.ts
 import { Request, Response, NextFunction } from 'express';
-import { AnyZodObject } from 'zod';
+import { AnyZodObject, ZodError } from 'zod';
 import { ApiError } from '@/utils/ApiError';
 
 export const validate = (schema: AnyZodObject) => {
@@ -12,9 +12,15 @@ export const validate = (schema: AnyZodObject) => {
         params: req.params
       });
       next();
-    } catch (error: any) {
-      const errors = error.errors.map((e: any) => e.message);
-      next(new ApiError(400, 'داده‌های ورودی نامعتبر هستند', errors));
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errors = error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }));
+        throw new ApiError(400, 'داده‌های ورودی نامعتبر هستند', errors);
+      }
+      next(error);
     }
   };
 };
