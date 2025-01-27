@@ -29,7 +29,11 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem('token');
+      newFunction();
+
+      function newFunction() {
+        localStorage.removeItem('token');
+      }
     },
     clearError: (state) => {
       state.error = null;

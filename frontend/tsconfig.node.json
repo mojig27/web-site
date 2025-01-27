@@ -2,8 +2,9 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2022",
-    "lib": ["ES2023"],
+    "lib": ["ES5"],
     "module": "ESNext",
+    "composite": true,
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -11,7 +12,8 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    "noEmit": false,
+    "forceConsistentCasingInFileNames": true,
 
     /* Linting */
     "strict": true,
@@ -23,3 +25,5 @@
   "include": ["vite.config.ts"]
   
 }
+
+
