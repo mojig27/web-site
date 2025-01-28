@@ -3,6 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Toaster } from 'react-hot-toast'
+import { Providers } from '@/lib/providers'
 
 const vazirmatn = Vazirmatn({ 
   subsets: ['arabic'],
@@ -16,12 +17,13 @@ export const metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
     <html lang="fa" dir="rtl">
       <body className={`${vazirmatn.variable} font-sans min-h-screen flex flex-col`}>
+      <Providers>
         <Navbar />
         <main className="flex-grow">
           {children}
@@ -38,6 +40,7 @@ export default function RootLayout({
             },
           }}
         />
+        </Providers>
       </body>
     </html>
   )
