@@ -1,6 +1,5 @@
 // frontend/src/app/products/[id]/page.tsx
 'use client'
-
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
@@ -9,6 +8,34 @@ import { FiHeart, FiShoppingCart, FiShare2, FiChevronLeft, FiStar, FiTruck, FiSh
 import { useCartStore } from '@/store/cartStore'
 import { useFavoriteStore } from '@/store/favoriteStore'
 import { toast } from 'react-hot-toast'
+import { Suspense } from 'react';
+import { type Metadata } from 'next';
+import ProductDetails from '@/components/ProductDetails';
+import Loading from './loading';
+
+interface Props {
+  params: { id: string }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const product = await fetchProduct(params.id);
+  
+  return {
+    title: `${product.name} | فروشگاه`,
+    description: product.description,
+    openGraph: {
+      images: [{ url: product.image }]
+    }
+  };
+}
+
+export default function ProductPage({ params }: Props) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ProductDetails id={params.id} />
+    </Suspense>
+  );
+}
 
 interface ProductDetails {
   id: string
