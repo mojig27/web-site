@@ -1,13 +1,19 @@
-/* frontend/src/styles/globals.css */
-@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
-
 @import "tailwindcss/preflight";
 @tailwind utilities;
 
 :root {
-  direction: rtl;
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
 }
 
 body {
-  font-family: 'Vazirmatn', sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-end-rgb));
+}
+
+@layer utilities {
+  .rtl {
+    direction: rtl;
+  }
 }

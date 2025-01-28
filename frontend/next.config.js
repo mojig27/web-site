@@ -1,27 +1,27 @@
-module.exports = {
+// frontend/next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
-    images: {
-      domains: ['your-image-domain.com'], // دامنه‌هایی که تصاویر از آن‌ها بارگذاری می‌شوند
-    },
-    async headers() {
-      return [
-        {
-          source: '/(.*)',
-          headers: [
-            {
-              key: 'X-Content-Type-Options',
-              value: 'nosniff',
-            },
-            {
-              key: 'X-Frame-Options',
-              value: 'DENY',
-            },
-            {
-              key: 'X-XSS-Protection',
-              value: '1; mode=block',
-            },
-          ],
-        },
-      ];
-    },
-  };
+  images: {
+    domains: ['localhost', '127.0.0.1'],
+    formats: ['image/avif', 'image/webp']
+  },
+  i18n: {
+    locales: ['fa'],
+    defaultLocale: 'fa',
+    localeDetection: false
+  },
+  experimental: {
+    serverActions: true,
+    typedRoutes: true
+  },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack']
+    });
+    return config;
+  }
+};
+
+module.exports = nextConfig;
