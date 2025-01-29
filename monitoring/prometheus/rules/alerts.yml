@@ -1,0 +1,42 @@
+groups:
+  - name: main
+    rules:
+      # هشدار برای CPU
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "بالا بودن مصرف CPU ({{ $value }}%)"
+          description: "سرور {{ $labels.instance }} مصرف CPU بالایی دارد"
+
+      # هشدار برای حافظه
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "مصرف بالای حافظه ({{ $value }}%)"
+          description: "سرور {{ $labels.instance }} با کمبود حافظه مواجه است"
+
+      # هشدار برای زمان پاسخ‌دهی
+      - alert: HighResponseTime
+        expr: http_request_duration_seconds > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "زمان پاسخ‌دهی بالا"
+          description: "زمان پاسخ‌دهی برای {{ $labels.route }} بیش از 2 ثانیه است"
+
+      # هشدار برای خطاهای HTTP
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{code=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "نرخ بالای خطا"
+          description: "بیش از 5% درخواست‌ها با خطا مواجه شده‌اند"

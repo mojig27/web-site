@@ -1,0 +1,43 @@
+{
+    "version": 1,
+    "objects": [
+      {
+        "id": "error-overview",
+        "type": "visualization",
+        "attributes": {
+          "title": "Error Distribution",
+          "visState": {
+            "type": "pie",
+            "params": {
+              "type": "pie",
+              "addTooltip": true,
+              "addLegend": true,
+              "legendPosition": "right",
+              "isDonut": true
+            },
+            "aggs": [
+              {
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "schema": "metric",
+                "params": {}
+              },
+              {
+                "id": "2",
+                "enabled": true,
+                "type": "terms",
+                "schema": "segment",
+                "params": {
+                  "field": "level.keyword",
+                  "size": 5,
+                  "order": "desc",
+                  "orderBy": "1"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }

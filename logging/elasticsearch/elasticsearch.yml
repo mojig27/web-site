@@ -1,0 +1,3 @@
+xpack.ml.enabled: true
+xpack.security.enabled: true
+xpack.monitoring.collection.enabled: true

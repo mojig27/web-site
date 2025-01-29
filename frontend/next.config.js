@@ -1,27 +1,20 @@
-// frontend/next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  compress: true,
-  
   images: {
-    domains: ['localhost', '127.0.0.1'],
+    domains: ['your-image-domain.com'],
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['@heroicons/react'],
-  },
-
   async headers() {
     return [
       {
         source: '/:path*',
         headers: [
+          {
+            key: 'Server-Timing',
+            value: '1'
+          },
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on'
@@ -40,12 +33,12 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
+            value: 'strict-origin-when-cross-origin'
           }
         ]
       }
-    ];
+    ]
   }
-};
+}
 
-export default nextConfig;
+module.exports = nextConfig;

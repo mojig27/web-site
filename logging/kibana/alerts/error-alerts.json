@@ -1,0 +1,26 @@
+{
+    "rule_type_id": "logs.alert.document.count",
+    "name": "High Error Rate Alert",
+    "schedule": { "interval": "5m" },
+    "enabled": true,
+    "params": {
+      "index": ["logs-*"],
+      "timeField": "@timestamp",
+      "aggregationType": "count",
+      "groupBy": ["level.keyword"],
+      "filterQuery": "level:error",
+      "thresholdComparator": ">",
+      "threshold": [10],
+      "timeWindowSize": 5,
+      "timeWindowUnit": "m"
+    },
+    "actions": [
+      {
+        "group": "default",
+        "id": "slack",
+        "params": {
+          "message": "High error rate detected! Check Kibana for details."
+        }
+      }
+    ]
+  }

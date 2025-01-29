@@ -1,0 +1,35 @@
+{
+    "job_id": "web_traffic_anomalies",
+    "description": "Detect anomalies in web traffic patterns",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "detector_description": "Unusual HTTP response counts",
+          "function": "count",
+          "by_field_name": "status.keyword"
+        },
+        {
+          "detector_description": "Unusual error rates",
+          "function": "count",
+          "by_field_name": "level.keyword",
+          "custom_rules": [
+            {
+              "scope": {
+                "level.keyword": "error"
+              }
+            }
+          ]
+        }
+      ],
+      "influencers": [
+        "source.keyword",
+        "method.keyword",
+        "path.keyword"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp",
+      "time_format": "epoch_ms"
+    }
+  }

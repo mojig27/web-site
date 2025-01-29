@@ -1,0 +1,23 @@
+{
+    "rule_type_id": "ml",
+    "name": "ML Anomaly Detection Alert",
+    "schedule": { "interval": "5m" },
+    "enabled": true,
+    "params": {
+      "mlJobId": "web_traffic_anomalies",
+      "anomalyScoreThreshold": 75,
+      "windowSize": {
+        "value": 1,
+        "unit": "h"
+      }
+    },
+    "actions": [
+      {
+        "group": "ml-alerts",
+        "id": "slack",
+        "params": {
+          "message": "ML has detected anomalies in web traffic patterns. Score: {{anomaly_score}}"
+        }
+      }
+    ]
+  }
