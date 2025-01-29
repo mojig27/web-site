@@ -1,39 +1,62 @@
-// frontend/src/components/products/ProductCard.tsx
-import { FC } from 'react';
-import { ProductCardProps } from '@/types/components';
-import { Button } from '@/components/common/Button';
-import { formatPrice } from '@/lib/utils';
+// frontend/src/components/product/ProductCard.tsx
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { IProduct } from '@/types/product';
+import { formatPrice } from '@/utils/format';
 
-export const ProductCard: FC<ProductCardProps> = ({
-  product,
-  onAddToCart
-}) => {
-  const { id, title, price, image, description, isAvailable } = product;
+interface ProductCardProps {
+  product: IProduct;
+}
 
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
-    <div className="group relative rounded-lg border p-4 space-y-3">
-      <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200">
-        <img
-          src={image}
-          alt={title}
-          className="h-full w-full object-cover object-center group-hover:opacity-75"
-        />
-      </div>
-      <div className="space-y-1">
-        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-500 line-clamp-2">{description}</p>
-        <p className="text-lg font-semibold text-gray-900">
-          {formatPrice(price)}
-        </p>
-      </div>
-      <Button
-        variant="primary"
-        fullWidth
-        disabled={!isAvailable}
-        onClick={() => onAddToCart?.(id)}
-      >
-        {isAvailable ? 'افزودن به سبد خرید' : 'ناموجود'}
-      </Button>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+      <Link href={`/products/${product._id}`}>
+        <div className="relative h-64 w-full">
+          <Image
+            src={product.images[0]}
+            alt={product.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          {product.discount && (
+            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full">
+              {product.discount.percent}% تخفیف
+            </div>
+          )}
+        </div>
+        <div className="p-4">
+          <h3 className="text-lg font-semibold mb-2">{product.title}</h3>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-600">{product.brand}</span>
+            <span className="text-gray-600">{product.specifications.material}</span>
+          </div>
+          {product.discount ? (
+            <div className="flex flex-col">
+              <span className="line-through text-gray-400">
+                {formatPrice(product.price)}
+              </span>
+              <span className="text-lg font-bold text-red-500">
+                {formatPrice(product.price * (1 - product.discount.percent / 100))}
+              </span>
+            </div>
+          ) : (
+            <span className="text-lg font-bold">{formatPrice(product.price)}</span>
+          )}
+          <div className="mt-2 flex justify-between items-center">
+            <span className={`text-sm ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {product.stock > 0 ? 'موجود' : 'ناموجود'}
+            </span>
+            {product.installationGuide && (
+              <span className="text-sm text-blue-500">
+                راهنمای نصب
+              </span>
+            )}
+          </div>
+        </div>
+      </Link>
     </div>
   );
 };

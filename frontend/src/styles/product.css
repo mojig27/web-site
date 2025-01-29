@@ -1,0 +1,36 @@
+/* frontend/src/styles/product.css */
+.product-gallery-thumb {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .product-gallery-thumb:hover {
+    transform: scale(1.05);
+  }
+  
+  .product-price {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+  }
+  
+  .product-description {
+    text-align: justify;
+    line-height: 1.8;
+  }
+  
+  .color-option {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .color-option:hover {
+    transform: scale(1.1);
+  }
+  
+  .installation-guide {
+    background-color: #f8fafc;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }

@@ -1,42 +1,69 @@
-// src/controllers/product.controller.ts
+// backend/src/controllers/product.controller.ts
 import { Request, Response } from 'express';
 import { Product } from '@/models/Product';
 import { ApiError } from '@/utils/ApiError';
 import { catchAsync } from '@/utils/catchAsync';
+import { ProductCategories } from '@/constants/categories';
 
 // دریافت همه محصولات با قابلیت فیلتر و صفحه‌بندی
 export const getProducts = catchAsync(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
+  const limit = parseInt(req.query.limit as string) || 12;
   const skip = (page - 1) * limit;
 
-  const query = Product.find();
+  const query: any = {};
 
-  // اعمال فیلترها
+  // فیلترهای پیشرفته
   if (req.query.category) {
-    query.where('category').equals(req.query.category);
+    query.category = req.query.category;
   }
-  if (req.query.minPrice) {
-    query.where('price').gte(parseInt(req.query.minPrice as string));
+  if (req.query.brand) {
+    query.brand = req.query.brand;
   }
-  if (req.query.maxPrice) {
-    query.where('price').lte(parseInt(req.query.maxPrice as string));
+  if (req.query.minPrice || req.query.maxPrice) {
+    query.price = {};
+    if (req.query.minPrice) query.price.$gte = parseInt(req.query.minPrice as string);
+    if (req.query.maxPrice) query.price.$lte = parseInt(req.query.maxPrice as string);
   }
-  if (req.query.isAvailable) {
-    query.where('isAvailable').equals(req.query.isAvailable === 'true');
+  if (req.query.material) {
+    query['specifications.material'] = req.query.material;
+  }
+  if (req.query.color) {
+    query['specifications.colors'] = req.query.color;
+  }
+  if (req.query.inStock === 'true') {
+    query.stock = { $gt: 0 };
+  }
+  if (req.query.hasDiscount === 'true') {
+    query.discount = { $exists: true };
   }
 
-  // اعمال مرتب‌سازی
-  if (req.query.sort) {
-    const sortField = (req.query.sort as string).replace('-', '');
-    const sortOrder = (req.query.sort as string).startsWith('-') ? -1 : 1;
-    query.sort({ [sortField]: sortOrder });
-  } else {
-    query.sort('-createdAt');
+  // مرتب‌سازی
+  let sortOption = {};
+  switch (req.query.sort) {
+    case 'price_asc':
+      sortOption = { price: 1 };
+      break;
+    case 'price_desc':
+      sortOption = { price: -1 };
+      break;
+    case 'newest':
+      sortOption = { createdAt: -1 };
+      break;
+    case 'oldest':
+      sortOption = { createdAt: 1 };
+      break;
+    default:
+      sortOption = { createdAt: -1 };
   }
 
-  const products = await query.skip(skip).limit(limit);
-  const total = await Product.countDocuments(query.getFilter());
+  const products = await Product.find(query)
+    .sort(sortOption)
+    .skip(skip)
+    .limit(limit)
+    .select('-createdBy');
+
+  const total = await Product.countDocuments(query);
 
   res.json({
     success: true,
@@ -52,7 +79,7 @@ export const getProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// دریافت یک محصول با شناسه
+// دریافت محصول با شناسه
 export const getProduct = catchAsync(async (req: Request, res: Response) => {
   const product = await Product.findById(req.params.id);
   
@@ -70,7 +97,7 @@ export const getProduct = catchAsync(async (req: Request, res: Response) => {
 export const createProduct = catchAsync(async (req: Request, res: Response) => {
   const product = await Product.create({
     ...req.body,
-    createdBy: req.user.id // از میدلور auth اضافه می‌شود
+    createdBy: req.user.id
   });
 
   res.status(201).json({
@@ -81,29 +108,15 @@ export const createProduct = catchAsync(async (req: Request, res: Response) => {
 
 // به‌روزرسانی محصول
 export const updateProduct = catchAsync(async (req: Request, res: Response) => {
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true }
+  );
 
   if (!product) {
     throw new ApiError(404, 'محصول مورد نظر یافت نشد');
   }
-
-  // بررسی دسترسی (فقط ادمین یا سازنده محصول)
-  if (req.user.role !== 'admin' && product.createdBy.toString() !== req.user.id) {
-    throw new ApiError(403, 'شما اجازه ویرایش این محصول را ندارید');
-  }
-
-  // به‌روزرسانی فیلدهای مجاز
-  Object.assign(product, {
-    title: req.body.title,
-    description: req.body.description,
-    price: req.body.price,
-    image: req.body.image,
-    category: req.body.category,
-    stock: req.body.stock,
-    isAvailable: req.body.isAvailable
-  });
-
-  await product.save();
 
   res.json({
     success: true,
@@ -113,21 +126,43 @@ export const updateProduct = catchAsync(async (req: Request, res: Response) => {
 
 // حذف محصول
 export const deleteProduct = catchAsync(async (req: Request, res: Response) => {
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findByIdAndDelete(req.params.id);
 
   if (!product) {
     throw new ApiError(404, 'محصول مورد نظر یافت نشد');
   }
 
-  // بررسی دسترسی (فقط ادمین یا سازنده محصول)
-  if (req.user.role !== 'admin' && product.createdBy.toString() !== req.user.id) {
-    throw new ApiError(403, 'شما اجازه حذف این محصول را ندارید');
+  res.status(204).json({
+    success: true,
+    data: null
+  });
+});
+
+// دریافت دسته‌بندی‌ها
+export const getCategories = catchAsync(async (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    data: ProductCategories
+  });
+});
+
+// دریافت محصولات مرتبط
+export const getRelatedProducts = catchAsync(async (req: Request, res: Response) => {
+  const product = await Product.findById(req.params.id);
+  
+  if (!product) {
+    throw new ApiError(404, 'محصول مورد نظر یافت نشد');
   }
 
-  await product.deleteOne();
+  const relatedProducts = await Product.find({
+    category: product.category,
+    _id: { $ne: product._id }
+  })
+    .limit(4)
+    .select('-createdBy');
 
   res.json({
     success: true,
-    message: 'محصول با موفقیت حذف شد'
+    data: relatedProducts
   });
 });
