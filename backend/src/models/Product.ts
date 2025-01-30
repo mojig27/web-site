@@ -55,5 +55,32 @@ const productSchema = new Schema<IProduct>({
     default: Date.now 
   }
 });
+// backend/src/models/Product.ts
+import mongoose from 'mongoose';
+import { z } from 'zod';
+
+// Schema اعتبارسنجی با Zod
+export const ProductValidation = z.object({
+  name: z.string().min(2, 'نام محصول باید حداقل 2 حرف باشد'),
+  price: z.number().min(1000, 'قیمت باید حداقل 1000 تومان باشد'),
+  description: z.string(),
+  imageUrl: z.string().url('آدرس تصویر معتبر نیست'),
+  category: z.string(),
+  stock: z.number().min(0, 'موجودی نمی‌تواند منفی باشد')
+});
+
+// مدل mongoose
+const productSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  description: String,
+  imageUrl: String,
+  category: String,
+  stock: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+export const Product = mongoose.model('Product', productSchema);
 
 export const Product = model<IProduct>('Product', productSchema);
