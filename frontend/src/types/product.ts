@@ -1,24 +1,29 @@
-// frontend/src/types/product.ts
-export interface IProduct {
-    _id: string;
-    title: string;
-    description: string;
-    price: number;
-    images: string[];
-    category: string;
+// src/types/product.ts
+interface IProduct {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  discount?: number;
+  category: string;
+  images: string[];
+  specifications: {
     brand: string;
-    specifications: {
-      material: string;
-      dimensions: string;
-      colors: string[];
-      warranty: string;
-      madeIn: string;
+    model: string;
+    material: string;
+    dimensions: {
+      width: number;
+      height: number;
+      depth: number;
     };
-    installationGuide?: string;
-    stock: number;
-    discount?: {
-      percent: number;
-      validUntil: Date;
-    };
-    isAvailable: boolean;
-  }
+    weight: number;
+    colors: string[];
+    warranty: string;
+  };
+  stock: number;
+  ratings: {
+    average: number;
+    count: number;
+  };
+  tags: string[];
+}
