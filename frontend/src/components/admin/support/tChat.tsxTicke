@@ -1,0 +1,185 @@
+
+// frontend/src/components/admin/support/tChat.tsxTicke
+import { useState, useEffect, useRef } from 'react';
+import { supportService } from '@/services/support.service';
+import { useSocket } from '@/hooks/useSocket';
+import { formatDate } from '@/utils/format';
+
+interface TicketChatProps {
+  ticket: any;
+  onClose: () => void;
+  onUpdate: (ticket: any) => void;
+}
+
+export const TicketChat: React.FC<TicketChatProps> = ({
+  ticket,
+  onClose,
+  onUpdate
+}) => {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [message, setMessage] = useState('');
+  const chatRef = useRef<HTMLDivElement>(null);
+  const socket = useSocket('support');
+
+  useEffect(() => {
+    fetchMessages();
+    socket.on(`ticket:${ticket._id}:message`, handleNewMessage);
+    return () => {
+      socket.off(`ticket:${ticket._id}:message`);
+    };
+  }, [ticket._id]);
+
+  const fetchMessages = async () => {
+    try {
+      setLoading(true);
+      const response = await supportService.getTicketMessages(ticket._id);
+      setMessages(response.data);
+      scrollToBottom();
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNewMessage = (message: any) => {
+    setMessages(prev => [...prev, message]);
+    scrollToBottom();
+  };
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      chatRef.current?.scrollTo({
+        top: chatRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 100);
+  };
+
+  const handleSend = async () => {
+    if (!message.trim()) return;
+
+    try {
+      setSending(true);
+      const response = await supportService.sendMessage({
+        ticketId: ticket._id,
+        content: message,
+        type: 'text'
+      });
+      setMessage('');
+      handleNewMessage(response.data);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleStatusChange = async (status: string) => {
+    try {
+      const response = await supportService.updateTicketStatus(ticket._id, status);
+      onUpdate(response.data);
+    } catch (error) {
+      console.error('Error updating ticket status:', error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* هدر تیکت */}
+      <div className="p-4 border-b">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold">
+              {ticket.subject}
+            </h2>
+            <div className="text-sm text-gray-500 mt-1">
+              شماره تیکت: {ticket.number} | 
+              وضعیت: {ticket.status} | 
+              اولویت: {ticket.priority}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={ticket.status}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              className="border rounded-lg p-2"
+            >
+              <option value="open">باز</option>
+              <option value="in_progress">در حال بررسی</option>
+              <option value="waiting">در انتظار پاسخ</option>
+              <option value="closed">بسته شده</option>
+            </select>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* چت */}
+      <div 
+        ref={chatRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+      >
+        {loading ? (
+          <div className="text-center py-4">در حال بارگذاری...</div>
+        ) : (
+          messages.map((msg) => (
+            <div
+              key={msg._id}
+              className={`flex ${
+                msg.sender.type === 'admin' ? 'justify-end' : 'justify-start'
+              }`}
+            >
+              <div
+                className={`max-w-[70%] rounded-lg p-3 ${
+                  msg.sender.type === 'admin'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100'
+                }`}
+              >
+                <div className="text-sm font-medium mb-1">
+                  {msg.sender.name}
+                </div>
+                <div>{msg.content}</div>
+                <div className="text-xs mt-1 opacity-70">
+                  {formatDate(msg.createdAt)}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* فرم ارسال پیام */}
+      <div className="p-4 border-t">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="پیام خود را بنویسید..."
+            className="flex-1 border rounded-lg p-2"
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          />
+          <button
+            onClick={handleSend}
+            disabled={sending || !message.trim()}
+            className={`
+              px-4 py-2 bg-blue-600 text-white rounded-md
+              ${(sending || !message.trim()) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}
+            `}
+          >
+            {sending ? 'در حال ارسال...' : 'ارسال'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
