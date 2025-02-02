@@ -1,45 +1,80 @@
-// src/pages/products/index.tsx
-import React, { useState, useEffect } from 'react';
-import { Product } from '@/types';
+// frontend/src/pages/products/index.tsx
+import { useEffect, useState } from 'react';
+import { ProductGrid, ProductFilters } from '@/components/products';
+import { productService } from '@/services/product.service';
+import { Product, ProductFilters as Filters } from '@/types';
+import { Pagination } from '@/components/common';
+import '@/styles/print.css';
 
-// مشکل: این کد الان وجود نداره و باید اضافه بشه
-const ProductsPage = () => {
-  // مدیریت state محصولات
+export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  // مدیریت state بارگذاری
   const [loading, setLoading] = useState(true);
-  // مدیریت state خطا
-  const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<Filters>({});
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = async (page: number, filters: Filters = {}) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/products');
-      if (!response.ok) throw new Error('خطا در دریافت محصولات');
-      const data = await response.json();
-      setProducts(data);
+      const response = await productService.getProducts({
+        ...filters,
+        page,
+        limit: 12
+      });
+      setProducts(response.data.products);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
-      setError('مشکلی در دریافت محصولات پیش آمده');
+      console.error('Error fetching products:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div>در حال بارگذاری...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  useEffect(() => {
+    fetchProducts(currentPage, filters);
+  }, [currentPage, filters]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleFilter = (newFilters: Filters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl mb-4">محصولات</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {products.map(product => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">محصولات</h1>
+      
+      <ProductFilters
+        onFilter={handleFilter}
+        categories={[
+          'شیرآلات',
+          'سینک',
+          'هود',
+          'گاز',
+          'رادیاتور',
+          'آبگرمکن',
+          'کولر آبی',
+          'کولر گازی',
+          'لوله و اتصالات'
+        ]}
+        brands={[/* لیست برندها */]}
+      />
+
+      <ProductGrid products={products} loading={loading} />
+
+      {!loading && totalPages > 1 && (
+        <div className="mt-8">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
     </div>
   );
-};
+}

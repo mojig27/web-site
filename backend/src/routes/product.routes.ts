@@ -1,32 +1,25 @@
 // backend/src/routes/product.routes.ts
 import { Router } from 'express';
-import {
-  createProduct,
-  getProducts,
-  getProduct,
-  updateProduct,
-  deleteProduct,
-  getCategories,
-  getRelatedProducts
-} from '@/controllers/product.controller';
-import { protect, restrictTo } from '@/middleware/auth';
-import { validate } from '@/middleware/validate';
-import { createProductSchema, updateProductSchema, productQuerySchema } from '@/schemas/product.schema';
+import { ProductController } from '../controllers/product.controller';
+import { protect, restrictTo } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { ProductValidation } from '../validations/product.validation';
 
 const router = Router();
+const productController = new ProductController();
 
 // مسیرهای عمومی
-router.get('/', validate(productQuerySchema), getProducts);
-router.get('/categories', getCategories);
-router.get('/:id', getProduct);
-router.get('/:id/related', getRelatedProducts);
+router.get('/', productController.getProducts);
+router.get('/search', productController.searchProducts);
+router.get('/:id', productController.getProduct);
+router.get('/:id/related', productController.getRelatedProducts);
 
-// مسیرهای محافظت شده (نیاز به احراز هویت)
+// مسیرهای مدیریتی (نیاز به احراز هویت)
 router.use(protect);
 router.use(restrictTo('admin'));
 
-router.post('/', validate(createProductSchema), createProduct);
-router.patch('/:id', validate(updateProductSchema), updateProduct);
-router.delete('/:id', deleteProduct);
+router.post('/', validate(ProductValidation), productController.createProduct);
+router.patch('/:id', validate(ProductValidation.partial()), productController.updateProduct);
+router.delete('/:id', productController.deleteProduct);
 
 export default router;

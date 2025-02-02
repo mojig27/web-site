@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useUserStore } from '@/store/userStore'
 import { toast } from 'react-hot-toast'
 import { motion } from 'framer-motion'
+import '@/styles/print.css';
 
 export default function ProfilePage() {
   const { user, setUser } = useUserStore()

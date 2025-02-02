@@ -12,7 +12,7 @@ import { Suspense } from 'react';
 import { type Metadata } from 'next';
 import ProductDetails from '@/components/ProductDetails';
 import Loading from './loading';
-
+import '@/styles/print.css';
 interface Props {
   params: { id: string }
 }

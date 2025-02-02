@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useUserStore } from '@/store/userStore'
 import Link from 'next/link'
 import { FiUser, FiShoppingBag, FiHeart, FiSettings, FiLogOut } from 'react-icons/fi'
+import '@/styles/print.css';
 
 const menuItems = [
   { href: '/profile', icon: FiUser, label: 'اطلاعات شخصی' },

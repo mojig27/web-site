@@ -8,6 +8,7 @@ import { useCartStore } from '@/store/cartStore'
 import { useUserStore } from '@/store/userStore'
 import { FiLock, FiCreditCard, FiTruck } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
+import '@/styles/print.css';
 
 interface ShippingInfo {
   fullName: string

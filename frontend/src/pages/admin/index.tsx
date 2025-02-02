@@ -1,79 +1,105 @@
 // frontend/src/pages/admin/index.tsx
-import { useEffect, useState } from 'react';
-import { GetServerSideProps } from 'next';
-import Link from 'next/link';
-import { requireAuth } from '@/utils/auth';
-
-interface DashboardStats {
-  totalProducts: number;
-  totalOrders: number;
-  lowStock: number;
-  revenue: number;
-}
+import { useState, useEffect } from 'react';
+import { AdminLayout } from '@/components/admin/layout';
+import { StatCard } from '@/components/admin/dashboard/StatCard';
+import { SalesChart } from '@/components/admin/dashboard/SalesChart';
+import { ProductsTable } from '@/components/admin/dashboard/ProductsTable';
+import { LatestOrders } from '@/components/admin/dashboard/LatestOrders';
+import { dashboardService } from '@/services/dashboard.service';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalProducts: 0,
-    totalOrders: 0,
-    lowStock: 0,
-    revenue: 0
-  });
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState('week'); // week, month, year
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [dateRange]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await dashboardService.getStats(dateRange);
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div>در حال بارگذاری...</div>
+      </AdminLayout>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">پنل مدیریت</h1>
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* کارت‌های آماری */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <StatCard
+            title="فروش امروز"
+            value={stats.todaySales.amount}
+            type="currency"
+            change={stats.todaySales.change}
+            icon="money"
+          />
+          <StatCard
+            title="سفارش‌های امروز"
+            value={stats.todayOrders.count}
+            type="number"
+            change={stats.todayOrders.change}
+            icon="shopping-cart"
+          />
+          <StatCard
+            title="بازدید امروز"
+            value={stats.todayVisits}
+            type="number"
+            change={stats.visitsChange}
+            icon="users"
+          />
+          <StatCard
+            title="میانگین سبد خرید"
+            value={stats.averageOrderValue}
+            type="currency"
+            change={stats.averageOrderChange}
+            icon="shopping-bag"
+          />
+        </div>
 
-      {/* آمار کلی */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-gray-500 mb-2">کل محصولات</h3>
-          <p className="text-2xl font-bold">{stats.totalProducts}</p>
+        {/* نمودار فروش */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-semibold">نمودار فروش</h2>
+            <select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className="border rounded-lg p-2"
+            >
+              <option value="week">هفته اخیر</option>
+              <option value="month">ماه اخیر</option>
+              <option value="year">سال اخیر</option>
+            </select>
+          </div>
+          <SalesChart data={stats.salesChart} />
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-gray-500 mb-2">سفارشات</h3>
-          <p className="text-2xl font-bold">{stats.totalOrders}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-gray-500 mb-2">موجودی کم</h3>
-          <p className="text-2xl font-bold text-red-500">{stats.lowStock}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-gray-500 mb-2">درآمد کل</h3>
-          <p className="text-2xl font-bold text-green-500">
-            {stats.revenue.toLocaleString()} تومان
-          </p>
+
+        {/* آمار محصولات و سفارش‌ها */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">پرفروش‌ترین محصولات</h2>
+            <ProductsTable products={stats.topProducts} />
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">آخرین سفارش‌ها</h2>
+            <LatestOrders orders={stats.latestOrders} />
+          </div>
         </div>
       </div>
-
-      {/* دسترسی سریع */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link href="/admin/products">
-          <div className="bg-blue-50 p-6 rounded-lg hover:bg-blue-100 transition-colors">
-            <h3 className="font-bold mb-2">مدیریت محصولات</h3>
-            <p className="text-gray-600">
-              افزودن، ویرایش و مدیریت محصولات
-            </p>
-          </div>
-        </Link>
-        <Link href="/admin/orders">
-          <div className="bg-green-50 p-6 rounded-lg hover:bg-green-100 transition-colors">
-            <h3 className="font-bold mb-2">سفارشات</h3>
-            <p className="text-gray-600">
-              مدیریت و پیگیری سفارشات
-            </p>
-          </div>
-        </Link>
-        <Link href="/admin/inventory">
-          <div className="bg-yellow-50 p-6 rounded-lg hover:bg-yellow-100 transition-colors">
-            <h3 className="font-bold mb-2">موجودی و قیمت‌ها</h3>
-            <p className="text-gray-600">
-              مدیریت موجودی و قیمت‌گذاری
-            </p>
-          </div>
-        </Link>
-      </div>
-    </div>
+    </AdminLayout>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = requireAuth;

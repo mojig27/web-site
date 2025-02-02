@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { FiHeart, FiShoppingCart, FiTrash2 } from 'react-icons/fi'
 import { useCartStore } from '@/store/cartStore'
 import { toast } from 'react-hot-toast'
-
+import '@/styles/print.css';
 // ابتدا یک store جدید برای علاقه‌مندی‌ها ایجاد می‌کنیم
 // frontend/src/store/favoriteStore.ts
 import { create } from 'zustand'
